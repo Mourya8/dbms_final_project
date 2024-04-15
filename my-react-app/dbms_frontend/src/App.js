@@ -2,6 +2,7 @@ import React, { useState ,useEffect} from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
+import MessagePopup from './components/MessagePopup';
 
 const Container = styled.div`
   font-family: Arial, sans-serif;
@@ -44,6 +45,110 @@ const Footer = styled.footer`
   padding: 20px;
   text-align: center;
 `;
+
+function EditModal({ isOpen, onClose, item, onChange, onSave, readOnlyFields = [], editableFields }) {
+  if (!isOpen) return null;
+
+  const handleChange = (key, value) => {
+    const updatedItem = {...item, [key]: value};
+    onChange(updatedItem);  // Send the entire updated item up
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(item);
+    onClose();
+  };
+  
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', zIndex: 1000
+    }}>
+      <div style={{
+        background: 'white', padding: '30px', borderRadius: '10px',
+        width: '90%', maxWidth: '500px', position: 'relative',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center'
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: '10px', right: '10px', border: 'none',
+          background: 'transparent', fontSize: '1.5rem', cursor: 'pointer'
+        }}>×</button>
+        <form onSubmit={(e) => { e.preventDefault(); onSave(item); }}>
+          {Object.keys(item).map(key => (
+            <div key={key} style={{ marginBottom: '10px', textAlign: 'center' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>{key.split('_').join(' ')}:</label>
+              <input
+                type="text"
+                value={item[key] || ''}
+                onChange={(e) => handleChange(key, e.target.value)}
+                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '100%' }}
+                readOnly={key.toLowerCase().includes('_id') && !editableFields.includes(key)}  // Making ID fields readOnly, except those specified as editable
+              />
+            </div>
+          ))}
+          <button type="submit" style={{
+            backgroundColor: '#007bff', color: '#fff', border: 'none',
+            padding: '10px 20px', borderRadius: '5px', cursor: 'pointer'
+          }}>Update</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function AddModal({ isOpen, onClose, item, onChange, onSave, editableFields }) {
+  if (!isOpen) return null;
+
+  const handleChange = (key, value) => {
+    const updatedItem = {...item, [key]: value};
+    onChange(updatedItem);  // Send the entire updated item up
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(item);
+    onClose();
+  };
+  
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', zIndex: 1000
+    }}>
+      <div style={{
+        background: 'white', padding: '30px', borderRadius: '10px',
+        width: '90%', maxWidth: '500px', position: 'relative',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center'
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: '10px', right: '10px', border: 'none',
+          background: 'transparent', fontSize: '1.5rem', cursor: 'pointer'
+        }}>×</button>
+        <form onSubmit={(e) => { e.preventDefault(); onSave(item); }}>
+          {Object.keys(item).map(key => (
+            <div key={key} style={{ marginBottom: '10px', textAlign: 'center' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>{key.split('_').join(' ')}:</label>
+              <input
+                type="text"
+                value={item[key] || ''}
+                onChange={(e) => handleChange(key, e.target.value)}
+                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '100%' }}
+                readOnly={key.toLowerCase().includes('_id') && !editableFields.includes(key)}  // Making ID fields readOnly, except those specified as editable
+              />
+            </div>
+          ))}
+          <button type="submit" style={{
+            backgroundColor: '#007bff', color: '#fff', border: 'none',
+            padding: '10px 20px', borderRadius: '5px', cursor: 'pointer'
+          }}>Update</button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 let prescriptions = [
   {
@@ -121,6 +226,10 @@ function App() {
   // Define state variables for login and active dashboard tab
   const [loggedIn, setLoggedIn] = useState(true); // Set to true for testing purposes
   const [activeTab, setActiveTab] = useState('home');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState({});
+  const [editableFields, setEditableFields] = useState([]);
 
   const [prescriptions, setPrescriptions] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -145,6 +254,8 @@ function App() {
   // Function to handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+
+    
 
     //new pages are to be added here.
     switch(tab){
@@ -176,6 +287,52 @@ function App() {
     }
   };
 
+  // Handle updating the item in the modal
+  const handleItemChange = (updatedItem) => {
+    setCurrentItem(updatedItem);
+  };
+
+  // Function to handle modal save
+  const handleItemSave = (item) => {
+    console.log('Saving item:', item);
+    // Here you would typically handle the API call or state update
+    setEditModalOpen(false);
+  };
+
+
+  // Open modal with item details
+  const openEditModal = (item, editableFields) => {
+    setCurrentItem(item);  // Set the current item to be edited in the modal
+    setEditableFields(editableFields);  // Set which fields should not be read-only
+    setEditModalOpen(true);  // Open the modal
+  };
+  
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+  };
+
+  const openAddModal = (newItem, editableFields) => {
+    setCurrentItem(newItem);  // Set the new item structure for the modal
+    setEditableFields(editableFields);  // Set which fields are editable
+    setAddModalOpen(true);  // Open the add modal
+  };
+  
+  const closeAddModal = () => {
+    setAddModalOpen(false);
+  };
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const showMessage = (msg) => {
+    setMessage(msg);
+    setShowPopup(true);
+  };
+
+  const hidePopup = () => {
+    setShowPopup(false);
+  };
+
   function insertDoctor()
   {
     fetch('http://localhost:8081/doctors', {
@@ -183,14 +340,21 @@ function App() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ doctor_id:20000,doctor_name: 'test12', hospital_id: 102})
+      body: JSON.stringify({ doctor_id:14000,doctor_name: 'test16', hospital_id: 102})
     })
       .then(response => response.json())
       .then(data => {
         console.log(data);
+        setMessage('Refresh the table');  // Set success message
+        setShowPopup(true);  // Show the popup
+        processDoctors();  // Assuming processDoctors is a function to refresh the table
+      
       })
       .catch(error => {
         console.error('Error:', error);
+        setMessage('Error while inserting');  // Set error message
+        setShowPopup(true);  // Show the popup
+      
       });
       processDoctors();
   }
@@ -372,7 +536,7 @@ function App() {
              
               <td style={{ textAlign: 'center' }}>
                 {/* Buttons for actions */}
-                <a href="#">Edit</a>
+                <button onClick={() => openEditModal(prescription, 'Prescription', ['prescription_date', 'patient_id'])}>Edit</button>
                 <span style={{ margin: '0 5px' }}>|</span>
                 <a href="#">Delete</a>
               </td>
@@ -463,7 +627,7 @@ function App() {
               
               <td style={{ textAlign: 'center' }}>
                 {/* Buttons for actions */}
-                <a href="#">Edit</a>
+                <button onClick={() => openEditModal(doctors, 'Doctor', ['doctor_name', 'hospital_id'])}>Edit</button>
                 <span style={{ margin: '0 5px' }}>|</span>
                 <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("doctors",doctors.doctor_id)}}>Delete</a>
               </td>
@@ -472,7 +636,12 @@ function App() {
         </tbody>
     </table>
     {/* Actions for Administrators */}
-    <Button onClick={(e) => { e.preventDefault(); insertDoctor()}}>Add New Doctor Item</Button>
+    <Button onClick={(e) => { e.preventDefault(); openAddModal({doctor_id: '', doctor_name: '', hospital_id: ''}, ['doctor_id','doctor_name', 'hospital_id']);}}>Add New Doctor Item</Button>
+    <MessagePopup 
+        showPopup={showPopup} 
+        message={message} 
+        onClose={() => setShowPopup(false)}  // Close the popup
+      />
   </>
 )}
 
@@ -509,7 +678,7 @@ function App() {
           
           <td style={{ textAlign: 'center' }}>
             {/* Buttons for actions */}
-            <a href="#">Edit</a>
+            <button onClick={() => openEditModal(machines, 'Machine', ['machine_zip', 'machine_address', 'machine_status'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
             <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("machines",machines.machine_id)}}>Delete</a>
               </td>
@@ -519,7 +688,7 @@ function App() {
       </tbody>
     </table>
     {/* Actions for Administrators */}
-    <Button>Add New Machine Item</Button>
+    <Button onClick={(e) => { e.preventDefault(); openAddModal({machine_id: '', machine_zip: '', machine_address: '', machine_status:''}, ['machine_id','machine_zip', 'machine_address', 'machine_status']);}}>Add New Machine Item</Button>
   </>
 )}
 
@@ -557,7 +726,7 @@ function App() {
           
           <td style={{ textAlign: 'center' }}>
             {/* Buttons for actions */}
-            <a href="#">Edit</a>
+            <button onClick={() => openEditModal(hospitals, 'Hospital', ['hospital_name', 'hospital_address', 'hospital_zip'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
             <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("hospitals",hospitals.hospital_id)}}>Delete</a>
           </td>
@@ -567,7 +736,7 @@ function App() {
       </tbody>
     </table>
     {/* Actions for Administrators */}
-    <Button>Add New Hospital Item</Button>
+    <Button onClick={(e) => { e.preventDefault(); openAddModal({hospital_id: '', hospital_name: '', hospital_address: '', hospital_zip:''}, ['hospital_id','hospital_name', 'hospital_address', 'hospital_zip']);}}>Add New Hospital Item</Button>
   </>
 )}
 
@@ -605,7 +774,7 @@ function App() {
           
           <td style={{ textAlign: 'center' }}>
             {/* Buttons for actions */}
-            <a href="#">Edit</a>
+            <button onClick={() => openEditModal(products, 'Product', ['product_name', 'category', 'uom'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
             <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("products",products.product_id)}}>Delete</a>
           </td>
@@ -615,7 +784,7 @@ function App() {
       </tbody>
     </table>
     {/* Actions for Administrators */}
-    <Button>Add New Product Item</Button>
+    <Button onClick={(e) => { e.preventDefault(); openAddModal({product_id: '', product_name: '', category: '', uom:''}, ['product_id','product_name', 'category', 'uom']);}}>Add New Product Item</Button>
   </>
 )}
 
@@ -651,7 +820,7 @@ function App() {
           <td style={{ textAlign: 'center' }}>{patients.doctor_id}</td>
           <td style={{ textAlign: 'center' }}>
             {/* Hyperlinks for actions */}
-            <a href="#">Edit</a>
+            <button onClick={() => openEditModal(patients, 'Patient', ['patient_name', 'patient_contact', 'doctor_id'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
             <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("patients",patients.patient_id)}}>Delete</a>
           </td>
@@ -661,9 +830,33 @@ function App() {
       </tbody>
     </table>
     {/* Actions for Administrators */}
-    <Button>Add New Patient</Button>
+    <Button onClick={(e) => { e.preventDefault(); openAddModal({patient_id: '', patient_name: '', patient_contact: '', doctor_id:''}, ['patient_id','patient_name', 'patient_contact', 'doctor_id']);}}>Add New Patient Item</Button>
   </>
 )}
+
+        {/* Modal for editing */}
+        {editModalOpen && (
+          <EditModal 
+            isOpen={editModalOpen}
+            onClose={closeEditModal}
+            item={currentItem}
+            onChange={handleItemChange}
+            onSave={handleItemSave}
+            readOnlyFields={editableFields}
+            editableFields={editableFields}
+          />
+        )}
+
+        {addModalOpen && (
+          <AddModal 
+            isOpen={addModalOpen}
+            onClose={closeAddModal}
+            item={currentItem}
+            onChange={handleItemChange}
+            onSave={handleItemSave}
+            editableFields={editableFields}
+          />
+        )}
 
       </ContentContainer>
       <Footer>
