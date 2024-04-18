@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 import MessagePopup from './components/MessagePopup';
+import NewPrescription from './pages/newPrescription';
+import { useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 const Container = styled.div`
   font-family: Arial, sans-serif;
@@ -225,6 +228,7 @@ let userLogs = [
 function App() {
   // Define state variables for login and active dashboard tab
   const [loggedIn, setLoggedIn] = useState(true); // Set to true for testing purposes
+  //const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -287,6 +291,15 @@ function App() {
     }
   };
 
+
+  
+
+  const handleAddNewPrescription = () => {
+    //navigate('/new-prescription');
+  };
+
+
+
   // Handle updating the item in the modal
   const handleItemChange = (updatedItem) => {
     setCurrentItem(updatedItem);
@@ -331,6 +344,12 @@ function App() {
 
   const hidePopup = () => {
     setShowPopup(false);
+  };
+
+
+  const openPrescriptionDetails = (prescriptionId) => {
+    const url = `/prescription-details?id=${prescriptionId}`;
+    window.open(url, '_blank');
   };
 
   function insertDoctor()
@@ -474,6 +493,20 @@ function App() {
   });
     console.log(`Item with ID ${id} deleted`);
   };
+
+  const handleSearchClick = (table,id) => {
+    fetch(`http://localhost:8081/${table}/${id}`, {
+      method: 'GET'
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log(data);
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+    console.log(`Item with ID ${id} deleted`);
+  };
   
 
 
@@ -530,7 +563,9 @@ function App() {
           {/* Loop over prescriptions and populate table rows */}
           {prescriptions.map(prescription => (
             <tr key={prescription.id}>
-              <td style={{ textAlign: 'center' }}>{prescription.prescription_id}</td>
+              <td style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => openPrescriptionDetails(prescription.prescription_id)}>
+                {prescription.prescription_id}
+              </td>
               <td style={{ textAlign: 'center' }}>{prescription.prescription_date}</td>
               <td style={{ textAlign: 'center' }}>{prescription.patient_id}</td>
              
@@ -545,51 +580,11 @@ function App() {
         </tbody>
     </table>
     {/* Actions for Doctors and Administrators */}
-    <Button>Add New Prescription</Button>
+    <Button onClick={handleAddNewPrescription}>Add New Prescription</Button>
   </>
 )}
 
 
-{activeTab === 'inventory' && (
-  <>
-    <Header2>Inventory</Header2>
-    <div style={{ marginBottom: '20px' }}>
-      <p>Search and Filter Options:</p>
-      <input type="text" placeholder="Search..." style={{ marginRight: '10px', padding: '5px' }} />
-      {/* Add filter options */}
-      {/* Example: <select> elements for filtering */}
-      <Button><FontAwesomeIcon icon={faSearch} /></Button>
-    </div>
-    <p>Inventory List:</p>
-    <table style={{ width: '100%', tableLayout: 'fixed' }}>
-      <thead>
-        <tr>
-          <th>Product Name</th>
-          <th>Category</th>
-          <th>Quantity</th>
-          <th>Machine</th>
-          <th>Last Updated</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style={{ textAlign: 'center' }}>Widget A</td>
-          <td style={{ textAlign: 'center' }}>Widget</td>
-          <td style={{ textAlign: 'center' }}>10</td>
-          <td style={{ textAlign: 'center' }}>Machine 1</td>
-          <td style={{ textAlign: 'center' }}>2024-02-03</td>
-          <td style={{ textAlign: 'center' }}>
-            <a href="#">Edit</a>
-            <span style={{ margin: '0 5px' }}>|</span>
-            <a href="#">Delete</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <Button>Add New Inventory Item</Button>
-  </>
-)}
 
 {activeTab === 'doctors' && (
   <>
@@ -674,7 +669,7 @@ function App() {
           <td style={{ textAlign: 'center' }}>{machines.machine_id}</td>
           <td style={{ textAlign: 'center' }}>{machines.machine_zip}</td>
           <td style={{ textAlign: 'center' }}>{machines.machine_address}</td>
-          <td style={{ textAlign: 'center' }}>{machines.machines_status}</td>
+          <td style={{ textAlign: 'center' }}>Active</td>
           
           <td style={{ textAlign: 'center' }}>
             {/* Buttons for actions */}
@@ -757,7 +752,6 @@ function App() {
         <tr>
           <th>Product ID</th>
           <th>Product Name</th>
-          <th>Category</th>
           <th>UoM</th>
           <th>Actions</th>
         </tr>
@@ -769,7 +763,6 @@ function App() {
           <td style={{ textAlign: 'center' }}>{products.product_id}</td>
           <td style={{ textAlign: 'center' }}>{products.product_name}</td>
           <td style={{ textAlign: 'center' }}>{products.category}</td>
-          <td style={{ textAlign: 'center' }}>{products.uom}</td>
           
           
           <td style={{ textAlign: 'center' }}>
@@ -872,5 +865,8 @@ function App() {
 
   );
 }
+
+
+
 
 export default App;
