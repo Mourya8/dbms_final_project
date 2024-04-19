@@ -62,6 +62,11 @@ function EditModal({ isOpen, onClose, item, onChange, onSave, readOnlyFields = [
     onSave(item);
     onClose();
   };
+
+  function updatePost()
+  {
+    console.log(item);
+  }
   
   return (
     <div style={{
@@ -94,7 +99,7 @@ function EditModal({ isOpen, onClose, item, onChange, onSave, readOnlyFields = [
           <button type="submit" style={{
             backgroundColor: '#007bff', color: '#fff', border: 'none',
             padding: '10px 20px', borderRadius: '5px', cursor: 'pointer'
-          }}>Update</button>
+          }} onClick={updatePost}>Update</button>
         </form>
       </div>
     </div>
@@ -114,6 +119,11 @@ function AddModal({ isOpen, onClose, item, onChange, onSave, editableFields }) {
     onSave(item);
     onClose();
   };
+
+  function updatePost()
+  {
+    console.log(item);
+  }
   
   return (
     <div style={{
@@ -146,7 +156,7 @@ function AddModal({ isOpen, onClose, item, onChange, onSave, editableFields }) {
           <button type="submit" style={{
             backgroundColor: '#007bff', color: '#fff', border: 'none',
             padding: '10px 20px', borderRadius: '5px', cursor: 'pointer'
-          }}>Update</button>
+          }} onClick={updatePost}>Insert</button>
         </form>
       </div>
     </div>
@@ -573,7 +583,7 @@ function App() {
                 {/* Buttons for actions */}
                 <button onClick={() => openEditModal(prescription, 'Prescription', ['prescription_date', 'patient_id'])}>Edit</button>
                 <span style={{ margin: '0 5px' }}>|</span>
-                <a href="#">Delete</a>
+                <button href="#">Delete</button>
               </td>
             </tr>
           ))}
@@ -624,7 +634,7 @@ function App() {
                 {/* Buttons for actions */}
                 <button onClick={() => openEditModal(doctors, 'Doctor', ['doctor_name', 'hospital_id'])}>Edit</button>
                 <span style={{ margin: '0 5px' }}>|</span>
-                <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("doctors",doctors.doctor_id)}}>Delete</a>
+                <button href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("doctors",doctors.doctor_id)}}>Delete</button>
               </td>
             </tr>
           ))}
@@ -675,7 +685,7 @@ function App() {
             {/* Buttons for actions */}
             <button onClick={() => openEditModal(machines, 'Machine', ['machine_zip', 'machine_address', 'machine_status'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
-            <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("machines",machines.machine_id)}}>Delete</a>
+            <button href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("machines",machines.machine_id)}}>Delete</button>
               </td>
         </tr>
         ))}
@@ -723,7 +733,7 @@ function App() {
             {/* Buttons for actions */}
             <button onClick={() => openEditModal(hospitals, 'Hospital', ['hospital_name', 'hospital_address', 'hospital_zip'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
-            <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("hospitals",hospitals.hospital_id)}}>Delete</a>
+            <button href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("hospitals",hospitals.hospital_id)}}>Delete</button>
           </td>
         </tr>
         
@@ -769,7 +779,7 @@ function App() {
             {/* Buttons for actions */}
             <button onClick={() => openEditModal(products, 'Product', ['product_name', 'category', 'uom'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
-            <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("products",products.product_id)}}>Delete</a>
+            <button href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("products",products.product_id)}}>Delete</button>
           </td>
         </tr>
         ))}
@@ -815,7 +825,7 @@ function App() {
             {/* Hyperlinks for actions */}
             <button onClick={() => openEditModal(patients, 'Patient', ['patient_name', 'patient_contact', 'doctor_id'])}>Edit</button>
             <span style={{ margin: '0 5px' }}>|</span>
-            <a href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("patients",patients.patient_id)}}>Delete</a>
+            <button href="#"onClick={(e) => { e.preventDefault(); handleDeleteClick("patients",patients.patient_id)}}>Delete</button>
           </td>
         </tr>
         
